@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import styled from "styled-components";
 import Logo from '../assets/husky.jpg';
+import {Link} from "react-router-dom";
 
 const Contacts = ({contacts, currentUser, handleChatChange}) => {
 
@@ -53,7 +54,7 @@ const Contacts = ({contacts, currentUser, handleChatChange}) => {
                                 ))
                             }
                         </div>
-                        <div className="current-user">
+                        <Link className="current-user" to={'/setAvatar'}>
                             <div className="avatar">
                                 <img
                                     src={`data:image/svg+xml;base64,${currentUserImage}`}
@@ -63,7 +64,7 @@ const Contacts = ({contacts, currentUser, handleChatChange}) => {
                             <div className="username">
                                 <h2>{currentUserName}</h2>
                             </div>
-                        </div>
+                        </Link>
                     </Container>
                 </>
             }
@@ -147,6 +148,7 @@ const Container = styled.div`
     justify-content: center;
     align-items: center;
     gap: 2rem;
+    text-decoration: none;
 
     .avatar {
       img {

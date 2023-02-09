@@ -4,8 +4,11 @@ const mongoose = require('mongoose');
 const morgan = require('morgan');
 const userRoutes = require('./routes/userRoute');
 const messageRoute = require('./routes/messageRoute');
-
+const fileUploader  = require('express-fileupload');
+const path = require("path");
 const app = express();
+
+
 require('dotenv').config();
 const corsOptions = {
     origin: 'http://localhost:3000',
@@ -13,9 +16,11 @@ const corsOptions = {
     optionSuccessStatus: 200,
 };
 
+app.use(fileUploader());
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
+app.use(express.static(path.join(__dirname, 'fileDirectory', 'photos')));
 app.use(morgan('dev'));
 app.use('/api/auth', userRoutes);
 app.use('/api/messages', messageRoute);

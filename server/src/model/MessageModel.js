@@ -11,6 +11,10 @@ const MessageSchema = mongoose.Schema(
             ref: "User",
             required: true,
         },
+        photo: {
+            type: String,
+            required: false,
+        }
     },
     {timestamps: true, toObject: {virtuals: true}, toJSON: {virtuals: true}}
 );

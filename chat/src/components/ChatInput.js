@@ -1,12 +1,13 @@
 import React, {useEffect, useState} from "react";
 import {BsEmojiSmileFill} from "react-icons/bs";
-import {IoMdSend} from "react-icons/io";
+import {IoMdSend, IoMdSettings} from "react-icons/io";
 import styled from "styled-components";
 import Picker from "emoji-picker-react";
-import {IoMdSettings} from 'react-icons/io';
+import {FaFileUpload} from "react-icons/fa";
 
 const ChatInput = ({handleSendMessage, messageDataToUpdate}) => {
     const [msg, setMsg] = useState("");
+    const [photo, setPhoto] = useState(null);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
     const handleEmojiPickerHideShow = () => {
@@ -22,8 +23,9 @@ const ChatInput = ({handleSendMessage, messageDataToUpdate}) => {
     const sendChat = (event) => {
         event.preventDefault();
         if (msg.length > 0) {
-            handleSendMessage(msg);
+            handleSendMessage(msg, photo);
             setMsg("");
+            setPhoto(null);
         }
     };
 
@@ -42,6 +44,19 @@ const ChatInput = ({handleSendMessage, messageDataToUpdate}) => {
                 </div>
             </div>
             <form className="input-container" onSubmit={(event) => sendChat(event)}>
+                <div className='file_input_box'>
+                    <input className='file_input'
+                           type="file"
+                           id="uploadBtn"
+                           name='photo'
+                           placeholder={'photo...'}
+                           onChange={e => setPhoto(e.target.files[0])}
+                    />
+                    <label className='file_label' htmlFor="uploadBtn">
+                        <FaFileUpload/>
+                        Upload photo
+                    </label>
+                </div>
                 <input
                     type="text"
                     placeholder="type your message here"
@@ -130,6 +145,36 @@ const Container = styled.div`
     align-items: center;
     gap: 2rem;
     background-color: #ffffff34;
+
+    .file_input_box {
+      display: flex;
+      justify-content: center;
+    }
+
+    .file_input {
+      display: none;
+    }
+
+    label {
+      display: inline-block;
+      text-transform: uppercase;
+      text-align: center;
+      user-select: none;
+      cursor: pointer;
+      background-color: #9a86f3;
+      color: white;
+      padding: 0.3rem 2rem;
+      border-radius: 2rem;
+      justify-content: center;
+      align-items: center;
+      border: none;
+      @media screen and (min-width: 720px) and (max-width: 1080px) {
+        padding: 0.3rem 1rem;
+        svg {
+          font-size: 1rem;
+        }
+      }
+    }
 
     input {
       width: 90%;

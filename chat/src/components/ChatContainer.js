@@ -3,9 +3,10 @@ import styled from "styled-components";
 import {Logout} from "./Logout";
 import {ChatInput} from "./ChatInput";
 import axios from "axios";
-import {deleteMessageRoute, getMessageRoute, sendMessageRoute, updateMessageRoute} from "../utils";
+import {deleteMessageRoute, getMessageRoute, host, sendMessageRoute, updateMessageRoute} from "../utils";
 import {MdDelete} from 'react-icons/md';
 import {MdTipsAndUpdates} from 'react-icons/md';
+import {NavLink} from "react-router-dom";
 
 const ChatContainer = ({currentChat, currentUser,}) => {
 
@@ -13,28 +14,55 @@ const ChatContainer = ({currentChat, currentUser,}) => {
     const [messageDataToUpdate, setMessageDataToUpdate] = useState({});
     const scrollRef = useRef();
 
-    const handleSendMessage = async (msg) => {
+    const handleSendMessage = async (msg, photo) => {
+        let formData = new FormData();
+
         if (messageDataToUpdate._id) {
-            const response = await axios.patch(updateMessageRoute(messageDataToUpdate._id), {
-                message: msg,
-            });
+            formData.append('message', msg);
+
+            if (photo !== null) {
+                formData.append('photo', photo);
+            }
+
+            const response = await axios.patch(updateMessageRoute(messageDataToUpdate._id), formData);
+
             const updatedMessage = response.data.message;
+
             setMessages(prevState => [...prevState].map(msg => msg._id === updatedMessage._id ? {
                 ...msg,
-                message: updatedMessage.message.text
+                message: updatedMessage.message.text,
+                photo: updatedMessage.photo,
             } : msg));
+
             setMessageDataToUpdate({});
+
             return;
         }
 
-        const response = await axios.post(sendMessageRoute, {
-            from: currentUser._id,
-            to: currentChat._id,
-            message: msg,
-        });
+        formData.append('from', currentUser._id);
+        formData.append('to', currentChat._id);
+        formData.append('message', msg);
+
+        if (photo !== null) {
+            formData.append('photo', photo);
+        }
+
+        const response = await axios.post(sendMessageRoute, formData);
         const message = response.data.message;
-        setMessages(prevState => [...prevState, {_id: message._id, fromSelf: true, message: message.message.text}]);
+        const uploadedPhoto = message?.photo;
+
+        setMessages(prevState => [...prevState, uploadedPhoto ? {
+            _id: message._id,
+            fromSelf: true,
+            message: message.message.text,
+            photo: message.photo
+        } : {
+            _id: message._id,
+            fromSelf: true,
+            message: message.message.text,
+        }]);
     };
+
     useEffect(() => {
         scrollRef.current?.scrollIntoView({behavior: "smooth"});
     }, [messages]);
@@ -60,12 +88,12 @@ const ChatContainer = ({currentChat, currentUser,}) => {
         <Container>
             <div className="chat-header">
                 <div className="user-details">
-                    <div className="avatar">
+                    <NavLink className="avatar">
                         <img
                             src={`data:image/svg+xml;base64,${currentChat.avatarImage}`}
                             alt="avatar"
                         />
-                    </div>
+                    </NavLink>
                     <div className="username">
                         <h3>{currentChat.username}</h3>
                     </div>
@@ -79,27 +107,37 @@ const ChatContainer = ({currentChat, currentUser,}) => {
                             <div className={`message ${message.fromSelf ? 'sender' : 'received'}`}>
                                 <div className={'content'}>
                                     <p>{message.message}</p>
+                                    {
+                                        message.photo
+                                            ?
+                                            <img className='message_image' src={host + '/' + message.photo}
+                                                 alt='photo'/>
+                                            :
+                                            <></>
+                                    }
                                 </div>
-                                {
-                                    message.fromSelf
-                                        ?
-                                        <span onClick={
-                                            () => setMessageDataToUpdate(message)}
-                                              className={'update_icons'}>
+                                <div className='button_container'>
+                                    {
+                                        message.fromSelf
+                                            ?
+                                            <span onClick={
+                                                () => setMessageDataToUpdate(message)}
+                                                  className={'update_icons'}>
                                         <MdTipsAndUpdates/>
                                     </span>
-                                        : <></>
-                                }
-                                {
-                                    message.fromSelf
-                                        ?
-                                        <span onClick={
-                                            () => deleteMessage(message._id)}
-                                              className={'delete_icons'}>
+                                            : <></>
+                                    }
+                                    {
+                                        message.fromSelf
+                                            ?
+                                            <span disa onClick={
+                                                () => deleteMessage(message._id)}
+                                                  className={'delete_icons'}>
                                         <MdDelete/>
                                     </span>
-                                        : <></>
-                                }
+                                            : <></>
+                                    }
+                                </div>
                             </div>
                         </div>
                     ))
@@ -178,6 +216,11 @@ const Container = styled.div`
         @media screen and (min-width: 720px) and (max-width: 1080px) {
           max-width: 70%;
         }
+
+        img {
+          width: 100%;
+          height: 300px;
+        }
       }
 
       .delete_icons {
@@ -212,6 +255,14 @@ const Container = styled.div`
 
       &:hover .update_icons {
         display: flex;
+      }
+
+      .button_container {
+        width: 50px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        align-items: flex-start;
       }
 
       .content {

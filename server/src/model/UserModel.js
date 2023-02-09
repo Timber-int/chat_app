@@ -7,23 +7,19 @@ const userSchema = new mongoose.Schema({
         min: 3,
         max: 20,
         unique: true,
-    },
-    email: {
+    }, email: {
         type: String,
         required: true,
         max: 50,
         unique: true,
-    },
-    password: {
+    }, password: {
         type: String,
         required: true,
         min: 8,
-    },
-    isAvatarImageSet: {
+    }, isAvatarImageSet: {
         type: Boolean,
         default: false,
-    },
-    avatarImage: {
+    }, avatarImage: {
         type: String,
         default: '',
     }

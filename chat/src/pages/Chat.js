@@ -4,6 +4,7 @@ import {useNavigate} from "react-router-dom";
 import axios from "axios";
 import {getUsersRoute} from "../utils";
 import {ChatContainer, Contacts, Welcome} from "../components";
+import {backgroundImageArray} from "../constants";
 
 const Chat = () => {
 
@@ -13,6 +14,7 @@ const Chat = () => {
     const [currentUser, setCurrentUser] = useState(undefined);
     const [currentChat, setCurrentChat] = useState(undefined);
     const [isLoaded, setIsLoaded] = useState(false);
+    const [backImage, setBackImage] = useState('');
 
     useEffect(() => {
         const getUser = async () => {
@@ -44,10 +46,15 @@ const Chat = () => {
         setCurrentChat(chat)
     }
 
+    useEffect(() => {
+        const num = Math.ceil(Math.random() * backgroundImageArray.length - 1);
+        setBackImage(backgroundImageArray.find((elem, index) => index === num));
+    }, [currentChat]);
+
     return (
         <>
             <Container>
-                <div className="container">
+                <div className="container" style={{backgroundImage: `url(${backImage})`}}>
                     <Contacts contacts={contacts} currentUser={currentUser} handleChatChange={handleChatChange}/>
                     {
                         isLoaded && currentUser && currentChat === undefined
@@ -79,7 +86,6 @@ const Container = styled.div`
   .container {
     height: 85vh;
     width: 85vw;
-    background-image: url("https://wallpaperbat.com/img/90735-animated-landscape-2560x1440-wallpaper.png");
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
